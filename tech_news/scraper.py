@@ -36,7 +36,27 @@ def scrape_next_page_link(html_content):
 
 # Requisito 4
 def scrape_news(html_content):
-    """Seu código deve vir aqui"""
+    selector = Selector(html_content)
+
+    data_dict = {}
+
+    data_dict["url"] = selector.css("link[rel='canonical']::attr(href)").get()
+    data_dict["title"] = selector.css("h1.entry-title::text").get().strip()
+    timestamp = selector.css("li.meta-date::text").get()
+    data_dict["timestamp"] = timestamp.strip() if timestamp else ""
+    data_dict["writer"] = selector.css("span.author a::text").get()
+    comments_count = selector.css(".title-block::text").re_first(r"\d+")
+    data_dict["comments_count"] = int(comments_count) if comments_count else 0
+    summary = selector.css(
+        ".entry-content > p:nth-of-type(1) *::text"
+    ).getall()
+    data_dict["summary"] = "".join(summary)
+    data_dict["summary"] = (
+        data_dict["summary"].strip() if data_dict["summary"] else "")
+    data_dict["tags"] = selector.css("section.post-tags a::text").getall()
+    category = selector.css(".label::text").get()
+    data_dict["category"] = category.strip() if category else ""
+    return data_dict
 
 
 # Requisito 5
